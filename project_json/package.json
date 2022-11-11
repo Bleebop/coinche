@@ -1,0 +1,16 @@
+{
+  "name": "coinche",
+  "version": "0.0.1",
+  "description": "A coinche-playing website",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "http": "^0.0.0",
+    "socket.io": "^4.5.3",
+    "events": "^3.3.0"
+  },
+  "license": "MIT"
+}

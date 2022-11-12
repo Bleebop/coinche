@@ -1,0 +1,67 @@
+body {
+	background: green;
+	font-size: 22px;
+	color: #444;
+}
+
+.card {
+	position: absolute;
+	visibility: hidden;
+}
+table, th, td {
+	border: 1px solid;
+	background: #EEEEEE;
+}
+button {
+	font-size: 22px;
+}
+.interface {
+	position: absolute;
+	visibility: hidden;
+	background: #EEEEEE;
+	border-radius: 5px;
+	border: 10px solid #EEEEEE;
+	z-index: 50;
+}
+
+#bid_history {
+	position: absolute;
+	top: 50px;
+	right: 100px;
+}
+#bid_interface {
+	left: 650px;
+	top: 350px;
+}
+#coinche_interface {
+	left: 650px;
+	top: 550px;
+}
+#surcoinche_interface {
+	left: 650px;
+	top: 550px;
+}
+#results {
+	left: 650px;
+	top: 600px;
+}
+#textp0 {
+	left: 600px;
+	top: 600px;
+	border-radius: 10px 10px 10px 0px;
+}
+#textp1 {
+	left: 350px;
+	top: 450px;
+	border-radius: 10px 10px 10px 0px;
+}
+#textp2 {
+	left: 600px;
+	top: 300px;
+	border-radius: 10px 0px 10px 10px;
+}
+#textp3 {
+	left: 1050px;
+	top: 450px;
+	border-radius: 10px 0px 10px 10px;
+}

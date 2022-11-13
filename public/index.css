@@ -8,6 +8,16 @@ body {
 	position: absolute;
 	visibility: hidden;
 }
+.overlay {
+	position: absolute;
+	visibility: hidden;
+	opacity: 0.8;
+	background: white;
+	text-align: center;
+	width: 169px;
+	height: 120px;
+	font-weight: bold;
+}
 table, th, td {
 	border: 1px solid;
 	background: #EEEEEE;
@@ -34,10 +44,18 @@ button {
 	top: 350px;
 }
 #coinche_interface {
+	position: absolute;
+	visibility: hidden;
+	background: #EEEEEE;
+	z-index: 50;
 	left: 650px;
 	top: 550px;
 }
 #surcoinche_interface {
+	position: absolute;
+	visibility: hidden;
+	background: #EEEEEE;
+	z-index: 50;
 	left: 650px;
 	top: 550px;
 }

@@ -201,3 +201,30 @@ function allowed_cards(trick, trump, hand) {
 	}
 }
 
+function belote_possible(hand, card_id, in_bidder_team, trump, current_trick, game_history) {
+	let card_suit = card_id.split("_")[0]+"s";
+	let id_king = card_suit.slice(0,-1) + "_king";
+	let id_queen = card_suit.slice(0,-1) + "_queen";
+	if (hand.includes(id_king) && hand.includes(id_queen)
+			&& (card_id === id_king || card_id === id_queen) && (in_bidder_team)) {
+		if ((current_trick.length === 0 || current_trick[0].split("_")[0] === card_suit)
+					&& trump === "all trump") {
+			return "belote";
+		} else if (card_suit === trump) {
+			return "belote";
+		} else {
+			return ""
+		}
+	} else if ((card_id === id_king && game_history.belotes.includes(id_queen))
+			|| (card_id === id_queen && game_history.belotes.includes(id_king))) {
+		if ((current_trick.length === 0 || current_trick[0].split("_")[0]+"s" === card_suit)
+				&& trump === "all trump") {
+			return "rebelote";
+		} else if (card_suit === this.contract.trump) {
+			return "rebelote";
+		} else {
+			return ""
+		}
+	}
+	return ""
+}

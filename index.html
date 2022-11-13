@@ -49,9 +49,17 @@
 				<input type="button" onclick="send_bid()" value="Enchérir"><br>
 				<input type="button" onclick="send_pass()" value="Passer">
 			</div>
-			<input class="interface" id="coinche_interface" type="button" onclick="send_coinche()" value="Coincher">
-			<input class="interface" id="surcoinche_interface" type="button" onclick="send_surcoinche()" value="Surcoincher">
+			<input id="coinche_interface" type="button" onclick="send_coinche()" value="Coincher">
+			<input id="surcoinche_interface" type="button" onclick="send_surcoinche()" value="Surcoincher">
 			<p class="interface" id="results"></p>
+			<div class="overlay" id="belote_overlay_0"></div>
+			<div class="overlay" id="belote_overlay_1"></div>
+			<div class="overlay" id="belote_overlay_2"></div>
+			<div class="overlay" id="belote_overlay_3"></div>
+			<div class="overlay" id="belote_overlay_4"></div>
+			<div class="overlay" id="belote_overlay_5"></div>
+			<div class="overlay" id="belote_overlay_6"></div>
+			<div class="overlay" id="belote_overlay_7"></div>
 		</div>
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="coinche_rules.js"></script>

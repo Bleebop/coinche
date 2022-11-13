@@ -246,7 +246,8 @@ class Play {
 					&& (card.id === id_king || card.id === id_queen)
 					&& (player%2 === this.contract.bidder%2)) {
 				if (this.contract.trump === "all trump"
-						&& this.current_trick[0].suit === card.suit) {
+						&& (this.current_trick.length === 0
+							|| this.current_trick[0].suit === card.suit)) {
 					this.play_history.belotes.push(card.id);
 				} else if (card.suit === this.contract.trump) {
 					this.play_history.belotes.push(card.id);
@@ -264,7 +265,8 @@ class Play {
 			if ((card.id === id_king && this.play_history.belotes.includes(id_queen))
 					|| (card.id === id_queen && this.play_history.belotes.includes(id_king))) {
 				if (this.contract.trump === "all trump"
-						&& card.suit === this.current_trick[0].suit) {
+						&& (this.current_trick.length === 0
+							|| this.current_trick[0].suit === card.suit)) {
 					this.play_history.belotes.push(card.id);
 					this.n_belote += 1;
 				} else if (card.suit === this.contract.trump) {
@@ -325,7 +327,7 @@ class Play {
 		if (this.contract.points < 250) {
 			return total >= this.contract.points;
 		} else {
-			return this.cards_won[this.contract.bidder%2].length = 32;
+			return this.cards_won[this.contract.bidder%2].length === 32;
 		}
 	}
 }

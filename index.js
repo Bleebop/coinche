@@ -79,8 +79,8 @@ io.on('connection', (socket) => {
 					   new ai.random_player(1),
 					   new ai.random_player(2),
 					   new ai.random_player(3)];
-		//let dealer = Math.floor(4 * Math.random());
-		let dealer = 2;
+		let dealer = Math.floor(4 * Math.random());
+		//let dealer = 3;
 		//rooms.set("room test", new coinche.Play(deck, dealer, players));
 		play = new coinche.Play(deck, dealer, players);
 	

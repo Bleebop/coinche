@@ -1,0 +1,15 @@
+~~interface belote~~
+fix trick display
+remove "s" from trumps (spades -> spade)
+everybody passes at start
+indicateur joueur en cours
+see last trick
+check coinche for random AI
+spectator mode with 4 AI
+god mode (control all 4 players)
+check AI playing speed
+multiplayer (rooms, etc.)
+actual AI
+gamestate save
+more responsive/pretty UI
+add rules

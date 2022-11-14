@@ -134,13 +134,17 @@ socket.on('card accepted', (card_play, next_player) => {
 		curr_trick = [];
 	}
 	draw_state(curr_hand, trick_before, curr_opener, curr_player, curr_contract.trump);
-	if (curr_trick.length === 4) {
+	if (trick_before.length === 4) {
 		curr_opener = next_player;
 	}
 });
 
-socket.on('end play', (total, win) => {
-	draw_end_game(total, win);
+socket.on('end play', (total, win, tricks_taken) => {
+	draw_end_game(total, win, tricks_taken);
+});
+
+socket.on('cancel play', () => {
+	draw_cancel_game();
 });
 
 function draw_bid_interface(contract, player) {
@@ -374,7 +378,7 @@ function draw_hands(hand) {
 	}
 }
 
-function draw_end_game(total, win) {
+function draw_end_game(total, win, tricks_taken) {
 	for (let card_id of belote_deck.cards.keys()) {
 		document.getElementById(card_id).style.visibility = "hidden";
 		document.getElementById(card_id).onclick = "";
@@ -399,8 +403,34 @@ function draw_end_game(total, win) {
 			res = "Partie gagnée !<br>Le contrat ennemi est chu.<br>";
 		}
 	}
-	res += "Points demandés : " + curr_contract.points + "<br>";
-	res += "Points faits : " + total;
+	if (curr_contract.points != 250) {
+		res += "Points demandés : " + curr_contract.points + "<br>";
+		res += "Points faits : " + total;
+	} else {
+		res += "Plis demandés : 8<br>";
+		res += "Plis faits : " + tricks_taken;
+	}
+	document.getElementById("results").innerHTML = res;
+	document.getElementById("results").style.visibility = "visible";
+	document.getElementById('launchGame').style.visibility = "visible";
+}
+
+function draw_cancel_game() {
+	for (let card_id of belote_deck.cards.keys()) {
+		document.getElementById(card_id).style.visibility = "hidden";
+		document.getElementById(card_id).onclick = "";
+		document.getElementById(card_id).style.filter = "brightness(100%)";
+	}
+	for (let i = 0; i < 32; i += 1) {
+		let back_id = "back" + i
+		document.getElementById(back_id).style.visibility = "hidden";
+	}
+	for (let i = 0; i < 4; i += 1) {
+		let bubble = document.getElementById("textp"+i.toString());
+		bubble.innerHTML = "";
+		bubble.style.visibility = "hidden";
+	}
+	let res = "Partie annulée.<br>Tout le monde a passé.";
 	document.getElementById("results").innerHTML = res;
 	document.getElementById("results").style.visibility = "visible";
 	document.getElementById('launchGame').style.visibility = "visible";

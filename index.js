@@ -67,6 +67,10 @@ coinche.eventEmitter.on('next turn', () => {
 coinche.eventEmitter.on('phase4', () => {
 	setTimeout(end_game, ai_card_delay, play);
 });
+	
+coinche.eventEmitter.on('phase5', () => {
+	setTimeout(cancel_game, ai_bid_delay);
+});
 
 const rooms = new Map();
 
@@ -165,7 +169,12 @@ function end_surcoinche(play) {
 
 function end_game(play) {
 	let total = play.count_points();
-	io.emit('end play', total, play.contract_won(total));
+	let tricks_taken = play.cards_won[play.contract.bidder%2].length/4;
+	io.emit('end play', total, play.contract_won(total), tricks_taken);
+}
+
+function cancel_game() {
+	io.emit('cancel play');
 }
 
 

@@ -220,7 +220,7 @@ function belote_possible(hand, card_id, in_bidder_team, trump, current_trick, ga
 		if ((current_trick.length === 0 || current_trick[0].split("_")[0]+"s" === card_suit)
 				&& trump === "all trump") {
 			return "rebelote";
-		} else if (card_suit === this.contract.trump) {
+		} else if (card_suit === trump) {
 			return "rebelote";
 		} else {
 			return ""

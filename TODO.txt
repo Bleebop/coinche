@@ -1,7 +1,7 @@
 ~~interface belote~~
-fix trick display
+~~fix trick display~~
+~~everybody passes at start~~
 remove "s" from trumps (spades -> spade)
-everybody passes at start
 indicateur joueur en cours
 see last trick
 check coinche for random AI

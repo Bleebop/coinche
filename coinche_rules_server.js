@@ -131,8 +131,13 @@ class Play {
 			this.n_passes += 1;
 			this.current_player = (this.current_player+1)%4
 			if (this.n_passes > 2) {
-				this.phase = 1;
-				eventEmitter.emit('phase1');
+				if (this.contract.points != 0) {
+					this.phase = 1;
+					eventEmitter.emit('phase1');
+				} else {
+					this.phase = 5;
+					eventEmitter.emit('phase5');
+				}
 			}
 			this.block = false;
 			return true;

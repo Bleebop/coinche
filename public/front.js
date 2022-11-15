@@ -23,7 +23,9 @@ for (let i = 0; i < 32; i += 1) {
 }
 
 var curr_contract = new Contract(0,0,"");
+var all_AI = false;
 var curr_hand = [];
+var curr_hands = [[],[],[],[]];
 var play_history = {
 	bids: [],
 	coinches: [],
@@ -35,7 +37,7 @@ var curr_trick = [];
 var hands_size = [8,8,8,8];
 var curr_opener = 0;
 var curr_player = 0;
-const player_pos = 0;
+var player_pos = 0;
 
 socket.onAny((eventName, args) => {
 	console.log(eventName, args);
@@ -46,6 +48,7 @@ function launchGame() {
 	document.getElementById("results").style.visibility = "hidden";
 	curr_contract = new Contract(0,0,"");
 	curr_hand = [];
+	curr_hands = [[],[],[],[]];
 	play_history = {
 		bids: [],
 		coinches: [],
@@ -74,6 +77,15 @@ socket.on('hand', (hand, dealer) => {
 	draw_bid_interface({bidder: -1, points: 0, trump: ""}, curr_player);
 });
 
+socket.on('hands', (hands, dealer) => {
+	player_pos = 0;
+	curr_hands = hands;
+	curr_player = (dealer+1)%4;
+	curr_opener = (dealer+1)%4;
+	draw_bids(play_history);
+	draw_all_hands(curr_hands);
+});
+
 socket.on('bid accepted', (contract) => {
 	if (contract.points === 0) {
 		n_passes += 1;
@@ -84,13 +96,14 @@ socket.on('bid accepted', (contract) => {
 	curr_player = (curr_player+1)%4;
 	play_history.bids.push(contract);
 	draw_bids(play_history);
-	draw_bid_interface(curr_contract, curr_player);
+	if (!all_AI) {
+		draw_bid_interface(curr_contract, curr_player);
+	}
 	draw_bubble_bid(contract);
 });
 socket.on('coinche accepted', (player) => {
 	play_history.coinches.push(player);
 	draw_bids(play_history);
-	draw_bid_interface(curr_contract, curr_player);
 });
 socket.on('surcoinche accepted', (player) => {
 	play_history.coinches.push(player);
@@ -100,7 +113,11 @@ socket.on('surcoinche accepted', (player) => {
 socket.on('contract', (contract) => {
 	curr_contract = contract;
 	curr_player = curr_opener;
-	draw_state(curr_hand, [], curr_opener, curr_opener, curr_contract.trump);
+	if (!all_AI) {
+		draw_state(curr_hand, [], curr_opener, curr_opener, curr_contract.trump);
+	} else {
+		draw_state_all_AI(curr_hands, [], curr_opener, curr_opener, curr_contract.trump);
+	}
 	document.getElementById('bid_interface').style.visibility = "hidden";
 	document.getElementById('coinche_interface').style.visibility = "hidden";
 	document.getElementById('surcoinche_interface').style.visibility = "hidden";
@@ -124,16 +141,25 @@ socket.on('card accepted', (card_play, next_player) => {
 	}
 	hands_size[player] -= 1;
 	curr_trick.push(card_id);
-	if (player === player_pos) {
-		let index = curr_hand.indexOf(card_id);
-		curr_hand.splice(index, 1);
+	if (!all_AI) {
+		if (player === player_pos) {
+			let index = curr_hand.indexOf(card_id);
+			curr_hand.splice(index, 1);
+		}
+	} else {
+		let index = curr_hands[player].indexOf(card_id);
+		curr_hands[player].splice(index, 1);
 	}
 	curr_player = next_player;
 	let trick_before = curr_trick;
 	if (curr_trick.length === 4) {
 		curr_trick = [];
 	}
-	draw_state(curr_hand, trick_before, curr_opener, curr_player, curr_contract.trump);
+	if (!all_AI) {
+		draw_state(curr_hand, trick_before, curr_opener, curr_player, curr_contract.trump);
+	} else {
+		draw_state_all_AI(curr_hands, trick_before, curr_opener, curr_player, curr_contract.trump);
+	}
 	if (trick_before.length === 4) {
 		curr_opener = next_player;
 	}
@@ -339,6 +365,72 @@ function draw_state(hand, trick, trick_opener, next_player, trump) {
 	}
 }
 
+function draw_state_all_AI(hands, trick, trick_opener, next_player, trump) {
+	let cards_ok = [];
+	let trick_cards = []
+	if (trick.length < 4) {
+		trick_cards = trick.map(card_id => belote_deck.cards.get(card_id));
+	}
+	cards_ok = allowed_cards(trick_cards, trump, hands[next_player].map(card_id => belote_deck.cards.get(card_id)));
+	cards_ok = cards_ok.map(card => card.id);
+	
+	let i = 0;
+	for (let card_id of belote_deck.cards.keys()) {
+		let card_elem = document.getElementById(card_id);
+		card_elem.style.visibility = "hidden";
+		card_elem.onclick = "";
+		card_elem.style.filter = "brightness(100%)";
+		card_elem.style.boxShadow = "";
+		for (let k = 0; k < 4; k = k+1) {
+			if (hands[k].includes(card_id)) {
+				if (k === 0) {
+					card_elem.style.left = (100+200*i).toString() + "px";
+					card_elem.style.top = "700px";
+				} else if (k === 1) {
+					card_elem.style.left = "100px";
+					card_elem.style.top = (100+50*i) + "px";
+				} else if (k === 2) {
+					card_elem.style.left = (500+50*i) + "px";
+					card_elem.style.top = "50px";
+				} else {
+					card_elem.style.left = "1200px";
+					card_elem.style.top = (100+50*i) + "px";
+				}
+				back_elem.style.transform = "rotate("+(90*k)+"deg)";
+				card_elem.style.zIndex = i.toString();
+				card_elem.style.visibility = "visible";
+				if (next_player === k) {
+					if (!cards_ok.includes(card_id)) {
+						card_elem.style.filter = "brightness(50%)";
+					} else {
+						card_elem.style.boxShadow = "0 0 10px #88FF88";
+					}
+				i += 1;
+			}
+		}
+	}
+	let j = 0;
+	for (let card_id of trick) {
+		let card_elem = document.getElementById(card_id);
+		if ((trick_opener+j)%4 === 0) {
+			card_elem.style.left = "650px";
+			card_elem.style.top = "400px";
+		} else if ((trick_opener+j)%4 === 1) {
+			card_elem.style.left = "450px";
+			card_elem.style.top = "350px";
+		} else if ((trick_opener+j)%4 === 2) {
+			card_elem.style.left = "650px";
+			card_elem.style.top = "300px";
+		} else {
+			card_elem.style.left = "850px";
+			card_elem.style.top = "350px";
+		}
+		card_elem.style.visibility = "visible";
+		card_elem.style.zIndex = j.toString();
+		j += 1;
+	}
+}
+
 function draw_hands(hand) {
 	let i = 0;
 	for (let card_id of belote_deck.cards.keys()) {
@@ -375,6 +467,35 @@ function draw_hands(hand) {
 			n += 1;
 		}
 		p += 1;
+	}
+}
+
+function draw_all_hands(hands) {
+	let i = 0;
+	for (let k = 0; k < 4; k = k+1) {
+		i = 0;
+		for (let card_id of belote_deck.cards.keys()) {
+			if (hands[k].includes(card_id)) {
+				let card_elem = document.getElementById(card_id);
+				if (k === 0) {
+					card_elem.style.left = (100+200*i).toString() + "px";
+					card_elem.style.top = "700px";
+				} else if (k === 1) {
+					card_elem.style.left = "100px";
+					card_elem.style.top = (100+50*i) + "px";
+				} else if (k === 2) {
+					card_elem.style.left = (500+50*i) + "px";
+					card_elem.style.top = "50px";
+				} else {
+					card_elem.style.left = "1200px";
+					card_elem.style.top = (100+50*i) + "px";
+				}
+				back_elem.style.transform = "rotate("+(90*k)+"deg)";
+				card_elem.style.zIndex = i.toString();
+				card_elem.style.visibility = "visible";
+				i += 1;
+			}
+		}
 	}
 }
 

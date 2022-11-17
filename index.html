@@ -20,7 +20,17 @@
 					<th>Atout</th>
 				</tr>
 			</table>
-			<button type="button" id="launchGame" onclick="launchGame()">Commencer une partie</button>
+			<div class="interface" id="launch_interface">
+				<label for="n_player_choice">Nombre de joueurs humains :</label><br>
+				<select id="n_player_choice" name="n_player_choice">
+					<option value="0">0</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+				</select><br>
+				<button type="button" id="launchGame" onclick="launchGame()">Commencer une partie</button>
+			</div>
 			<div class="interface" id="bid_interface">
 				<label for="bid_itf_points">Points du contrat</label><br>
 				<select id="bid_itf_points" name="bid_itf_points">

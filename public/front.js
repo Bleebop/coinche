@@ -39,12 +39,15 @@ var curr_opener = 0;
 var curr_player = 0;
 var player_pos = 0;
 
+document.getElementById('launch_interface').style.visibility = "visible";
+
 socket.onAny((eventName, args) => {
 	console.log(eventName, args);
 });
 
 function launchGame() {
-	document.getElementById('launchGame').style.visibility = "hidden";
+	let n_player = parseInt(document.getElementById('n_player_choice').value);
+	document.getElementById('launch_interface').style.visibility = "hidden";
 	document.getElementById("results").style.visibility = "hidden";
 	curr_contract = new Contract(0,0,"");
 	curr_hand = [];
@@ -60,7 +63,7 @@ function launchGame() {
 	hands_size = [8,8,8,8];
 	curr_opener = 0;
 	curr_player = 0;
-	socket.emit('launch game');
+	socket.emit('launch game', n_player);
 }
 
 function sendPing() {
@@ -69,6 +72,7 @@ function sendPing() {
 
 socket.on('hand', (hand, dealer) => {
 	//document.getElementById("test").innerHTML = hand;
+	all_AI = false;
 	curr_hand = hand;
 	curr_player = (dealer+1)%4;
 	curr_opener = (dealer+1)%4;
@@ -79,6 +83,7 @@ socket.on('hand', (hand, dealer) => {
 
 socket.on('hands', (hands, dealer) => {
 	player_pos = 0;
+	all_AI = true;
 	curr_hands = hands;
 	curr_player = (dealer+1)%4;
 	curr_opener = (dealer+1)%4;
@@ -374,7 +379,7 @@ function draw_state_all_AI(hands, trick, trick_opener, next_player, trump) {
 	cards_ok = allowed_cards(trick_cards, trump, hands[next_player].map(card_id => belote_deck.cards.get(card_id)));
 	cards_ok = cards_ok.map(card => card.id);
 	
-	let i = 0;
+	let i = [0,0,0,0];
 	for (let card_id of belote_deck.cards.keys()) {
 		let card_elem = document.getElementById(card_id);
 		card_elem.style.visibility = "hidden";
@@ -384,20 +389,20 @@ function draw_state_all_AI(hands, trick, trick_opener, next_player, trump) {
 		for (let k = 0; k < 4; k = k+1) {
 			if (hands[k].includes(card_id)) {
 				if (k === 0) {
-					card_elem.style.left = (100+200*i).toString() + "px";
+					card_elem.style.left = (100+200*i[k]).toString() + "px";
 					card_elem.style.top = "700px";
 				} else if (k === 1) {
 					card_elem.style.left = "100px";
-					card_elem.style.top = (100+50*i) + "px";
+					card_elem.style.top = (100+50*i[k]) + "px";
 				} else if (k === 2) {
-					card_elem.style.left = (500+50*i) + "px";
+					card_elem.style.left = (500+50*i[k]) + "px";
 					card_elem.style.top = "50px";
 				} else {
 					card_elem.style.left = "1200px";
-					card_elem.style.top = (100+50*i) + "px";
+					card_elem.style.top = (100+50*i[k]) + "px";
 				}
-				back_elem.style.transform = "rotate("+(90*k)+"deg)";
-				card_elem.style.zIndex = i.toString();
+				card_elem.style.transform = "rotate("+(90*k)+"deg)";
+				card_elem.style.zIndex = i[k].toString();
 				card_elem.style.visibility = "visible";
 				if (next_player === k) {
 					if (!cards_ok.includes(card_id)) {
@@ -405,13 +410,15 @@ function draw_state_all_AI(hands, trick, trick_opener, next_player, trump) {
 					} else {
 						card_elem.style.boxShadow = "0 0 10px #88FF88";
 					}
-				i += 1;
+				}
+				i[k] += 1;
 			}
 		}
 	}
 	let j = 0;
 	for (let card_id of trick) {
 		let card_elem = document.getElementById(card_id);
+		card_elem.style.transform = "";
 		if ((trick_opener+j)%4 === 0) {
 			card_elem.style.left = "650px";
 			card_elem.style.top = "400px";
@@ -490,7 +497,7 @@ function draw_all_hands(hands) {
 					card_elem.style.left = "1200px";
 					card_elem.style.top = (100+50*i) + "px";
 				}
-				back_elem.style.transform = "rotate("+(90*k)+"deg)";
+				card_elem.style.transform = "rotate("+(90*k)+"deg)";
 				card_elem.style.zIndex = i.toString();
 				card_elem.style.visibility = "visible";
 				i += 1;
@@ -511,17 +518,25 @@ function draw_end_game(total, win, tricks_taken) {
 	}
 	let res = "";
 	let bidder_in_team = (curr_contract.bidder%2 === player_pos%2);
-	if (bidder_in_team) {
-		if (win) {
-			res = "Partie gagnée !<br>Votre contrat est fait.<br>";
+	if (!all_AI) {
+		if (bidder_in_team) {
+			if (win) {
+				res = "Partie gagnée !<br>Votre contrat est fait.<br>";
+			} else {
+				res = "Partie perdue !<br>Votre contrat est chu.<br>";
+			}
 		} else {
-			res = "Partie perdue !<br>Votre contrat est chu.<br>";
+			if (win) {
+				res = "Partie perdue !<br>Le contrat ennemi est fait.<br>";
+			} else {
+				res = "Partie gagnée !<br>Le contrat ennemi est chu.<br>";
+			}
 		}
 	} else {
 		if (win) {
-			res = "Partie perdue !<br>Le contrat ennemi est fait.<br>";
+			res = "Le contrat de l'équipe " + (curr_contract.bidder%2) + " est fait.<br>";
 		} else {
-			res = "Partie gagnée !<br>Le contrat ennemi est chu.<br>";
+			res = "Le contrat de l'équipe " + (curr_contract.bidder%2) + " est chu.<br>";
 		}
 	}
 	if (curr_contract.points != 250) {
@@ -533,7 +548,7 @@ function draw_end_game(total, win, tricks_taken) {
 	}
 	document.getElementById("results").innerHTML = res;
 	document.getElementById("results").style.visibility = "visible";
-	document.getElementById('launchGame').style.visibility = "visible";
+	document.getElementById('launch_interface').style.visibility = "visible";
 }
 
 function draw_cancel_game() {
@@ -554,7 +569,7 @@ function draw_cancel_game() {
 	let res = "Partie annulée.<br>Tout le monde a passé.";
 	document.getElementById("results").innerHTML = res;
 	document.getElementById("results").style.visibility = "visible";
-	document.getElementById('launchGame').style.visibility = "visible";
+	document.getElementById('launch_interface').style.visibility = "visible";
 }
 
 function play_card(card_id) {
@@ -566,8 +581,8 @@ function play_card_belote(card_id, belote) {
 }
 
 function send_bid() {
-	bid_points = document.getElementById('bid_itf_points').value;
-	bid_trump = document.getElementById('bid_itf_trump').value;
+	let bid_points = document.getElementById('bid_itf_points').value;
+	let bid_trump = document.getElementById('bid_itf_trump').value;
 	socket.emit('bid', {bidder: player_pos, points: parseInt(bid_points), trump: bid_trump});
 }
 

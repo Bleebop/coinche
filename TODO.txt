@@ -1,11 +1,11 @@
 ~~interface belote~~
 ~~fix trick display~~
 ~~everybody passes at start~~
+~~spectator mode with 4 AI~~
 remove "s" from trumps (spades -> spade)
 indicateur joueur en cours
 see last trick
 check coinche for random AI
-spectator mode with 4 AI
 god mode (control all 4 players)
 check AI playing speed
 multiplayer (rooms, etc.)

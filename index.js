@@ -77,22 +77,35 @@ const rooms = new Map();
 io.on('connection', (socket) => {
 	console.log('a user connected');
   
-	socket.on('launch game', () => {
-		socket.join("room test");
-		let players = [new ai.human_player(0, socket.id),
+	socket.on('launch game', (n_player) => {
+		//socket.join("room test");
+		let players = [];
+		if (n_player) {
+			players = [new ai.human_player(0, socket.id),
 					   new ai.random_player(1),
 					   new ai.random_player(2),
 					   new ai.random_player(3)];
+		} else {
+			players = [new ai.random_player(0),
+					   new ai.random_player(1),
+					   new ai.random_player(2),
+					   new ai.random_player(3)];
+		}
 		let dealer = Math.floor(4 * Math.random());
 		//let dealer = 3;
 		//rooms.set("room test", new coinche.Play(deck, dealer, players));
 		play = new coinche.Play(deck, dealer, players);
-	
-		for (player of players) {
-			if (!player.is_ai) {
-				let player_hand = play.hands[player.position];
-				io.to(player.socketId).emit('hand', player_hand.map(card => card.id), dealer);
+		
+		if (n_player) {
+			for (player of players) {
+				if (!player.is_ai) {
+					let player_hand = play.hands[player.position];
+					io.to(player.socketId).emit('hand', player_hand.map(card => card.id), dealer);
+				}
 			}
+		} else {
+			let hands_id = play.hands.map(hand => hand.map(card => card.id));
+			io.emit('hands', hands_id, dealer);
 		}
 		
 		coinche.eventEmitter.emit('next turn');
